@@ -3,8 +3,10 @@
 namespace App\Exceptions;
 
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -42,6 +44,13 @@ class Handler extends ExceptionHandler
             'message' => 'Validation failed',
             'errors' => $exception->errors(),
             ], 422);
+        }
+        if ($exception instanceof ModelNotFoundException) {
+            return response()->json(['message' => 'Resource not found'], 404);
+        }
+
+        if ($exception instanceof AccessDeniedHttpException) {
+            return response()->json(['message' => 'Access denied'], 403);
         }
 
         return parent::render($request, $exception);
